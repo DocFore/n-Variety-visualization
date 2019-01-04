@@ -1,22 +1,26 @@
-class Hypersphere extends Shape { //<>//
+class Hypersphere extends Shape { //this object inherits of the class Shape
   int circlePart = 0;
+  
   Hypersphere(int dim, int numberPoints, float multi) {
     super(dim, multi, color(255, 63));
-    this.pointAmount = (int) pow(numberPoints, dim);
+    this.pointAmount = (int) pow(numberPoints, dim-1);
     this.circlePart = numberPoints;
     points = new ArrayList<Vector>();
   }
 
   void createCoord() {
     float deltaAngle = 2*PI/circlePart; 
+    int lessPoint = 0;
     for (int  i = 0; i < pointAmount; i++) { //creation of all the points thanks to this loop
       float[] coordinates = new float[dim];
-      float[] CoAngles = changeBase(circlePart, i, dim, deltaAngle); //all the factor are contained in this array
+      float[] coAngles = changeBase(circlePart, i, dim - 1, deltaAngle); //all the factor are contained in this array
       boolean canContinue = true;
 
-      for (int j = 0; j < CoAngles.length - 1; j++) { //cking if the angle is > to PI, to prevent doubles
-        if (CoAngles[j] > PI) {
+      for (int j = 0; j < coAngles.length - 1; j++) { //cking if the angle is > to PI, to prevent doubles
+        if (coAngles[j] > PI || coAngles[coAngles.length - 1] >= 2*PI) {
           canContinue = false;
+          lessPoint++;
+          break;
         }
       }
       if (canContinue) {
@@ -29,10 +33,12 @@ class Hypersphere extends Shape { //<>//
           }
 
           for (int k = 0; k <= j; k++) { // loop that multiply by the sinus or cosinus
-            if (k != j || last) {
-              coordinates[j] *= sin(CoAngles[k]);
-            } else {
-              coordinates[j] *= cos(CoAngles[k]);
+            if (k != coAngles.length) {
+              if (k != j || last) {
+                coordinates[j] *= sin(coAngles[k]);
+              } else {
+                coordinates[j] *= cos(coAngles[k]);
+              }
             }
           }
         }
@@ -40,6 +46,9 @@ class Hypersphere extends Shape { //<>//
         points.add(v);
       }
     }
+    println(this.pointAmount);
+    this.pointAmount -= lessPoint;
+    println(this.pointAmount);
   }
 
   float[] changeBase(int base, int number, int dimension, float mult) {
